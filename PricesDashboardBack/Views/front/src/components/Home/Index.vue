@@ -43,7 +43,7 @@
           <button class="btn btn-block btn-danger m-1" @click="renderChart()">Render</button>
         </div>
         <div class="col-md-6">
-          <h2 class="featurette-heading">pair for your. <span class="text-muted">Chart</span></h2>
+          <h2 class="featurette-heading">pair for your. <span class="text-muted">Chart</span> <h6 class="display-7 text-danger">{{ priceDescription }}</h6></h2>
           <line-chart :chart-data="dataCollection"></line-chart>
         </div>
 
@@ -70,19 +70,19 @@ export default {
     return {
       dataCollection: null,
       selectedPair: "btc/eth",
-      pairs: ["btc/ltc"],
-      groupBy: "month"
+      pairs: ["btc/ltc", "btc/etc", "dash/ltc", "btc/xem", "eth/xem", "vtc/btc", "bch/btc", "dash/dcr", "eth/etc", "bch/xem", "zec/vtc", "xmr/pivx", "ltc/doge"],
+      groupBy: "month",
+      priceDescription : ""
     }
   },
   mounted() {
     this.fillData()
   },
   methods: {
-
     async renderChart() {
       let baseCoin = this.$data.selectedPair.split('/')[0];
       let relatedCoin = this.$data.selectedPair.split('/')[1];
-      console.log(baseCoin, relatedCoin);
+      this.$data.priceDescription = `numbers ${baseCoin} per ${relatedCoin} by ${this.$data.groupBy}`;
       let res = await ApiService.post("prices", "api",
           {
             "BaseCoin": baseCoin,
@@ -104,9 +104,6 @@ export default {
           }
         ]
       }
-    },
-    getRandomInt() {
-      return Math.floor(Math.random() * (50 - 5 + 1)) + 5
     }
   }
 }
