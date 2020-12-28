@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using PricesDashboardBack.Models;
 using TinyCsvParser.Mapping;
 
@@ -20,6 +21,10 @@ namespace PricesDashboardBack.Services
             List<CsvMappingResult<CoinPrice>> csvData);
 
         public Dictionary<String, Double> CalculatePricesForPair(
+            Dictionary<String, List<CsvMappingResult<CoinPrice>>> baseCoin,
+            Dictionary<String, List<CsvMappingResult<CoinPrice>>> relatedCoin);
+
+        public Task<Dictionary<String, Double>> CalculatePricesForPairByTasks(
             Dictionary<String, List<CsvMappingResult<CoinPrice>>> baseCoin,
             Dictionary<String, List<CsvMappingResult<CoinPrice>>> relatedCoin);
     }

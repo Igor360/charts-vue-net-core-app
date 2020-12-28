@@ -82,7 +82,7 @@ export default {
     async renderChart() {
       let baseCoin = this.$data.selectedPair.split('/')[0];
       let relatedCoin = this.$data.selectedPair.split('/')[1];
-      this.$data.priceDescription = `numbers ${baseCoin} per ${relatedCoin} by ${this.$data.groupBy}`;
+      this.$data.priceDescription = `number of ${baseCoin} per ${relatedCoin} by ${this.$data.groupBy}`;
       let res = await ApiService.post("prices", "api",
           {
             "BaseCoin": baseCoin,

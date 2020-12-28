@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity.SqlServer;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using PricesDashboardBack.Models;
 using TinyCsvParser.Mapping;
 
@@ -30,8 +31,9 @@ namespace PricesDashboardBack.Services
             return csvData
                 .Where(x => x.Result?.date != null)
                 .Select(x => new {Date = DateTime.ParseExact(x.Result.date, BASE_TIME_FORMAT, cultureInfo), Data = x})
-                .GroupBy(x =>  $"{x.Date.Year} " + x.Date.ToString("ddd"))
-                .ToDictionary(x =>  $"{x.First().Date.Year} " + x.First().Date.ToString("ddd"), y => y.Select(el => el.Data).ToList());
+                .GroupBy(x => $"{x.Date.Year} " + x.Date.ToString("ddd"))
+                .ToDictionary(x => $"{x.First().Date.Year} " + x.First().Date.ToString("ddd"),
+                    y => y.Select(el => el.Data).ToList());
         }
 
 
@@ -76,6 +78,39 @@ namespace PricesDashboardBack.Services
                 var relatedMediumPrice = relatedCoin[keyValuePair.Key].ToList().Sum(x => x.Result.priceusd) /
                                          relatedCoin[keyValuePair.Key].ToList().Count;
                 res.Add(keyValuePair.Key, baseMediumPrice / relatedMediumPrice);
+            }
+
+            return res;
+        }
+
+        public async Task<Dictionary<String, Double>> CalculatePricesForPairByTasks(
+            Dictionary<String, List<CsvMappingResult<CoinPrice>>> baseCoin,
+            Dictionary<String, List<CsvMappingResult<CoinPrice>>> relatedCoin)
+        {
+            var res = new Dictionary<String, Double>();
+
+            var taskList = new List<Task<(String, Double)>>();
+            foreach (var entry in baseCoin)
+            {
+                if (!relatedCoin.ContainsKey(entry.Key))
+                {
+                    continue;
+                }
+
+                taskList.Add(Task<(String, Double)>.Run(() =>
+                {
+                    var baseMediumPrice =
+                        entry.Value.ToList().Sum(x => x.Result.priceusd) / entry.Value.ToList().Count;
+                    var relatedMediumPrice = relatedCoin[entry.Key].ToList().Sum(x => x.Result.priceusd) /
+                                             relatedCoin[entry.Key].ToList().Count;
+                    return (entry.Key, Value: baseMediumPrice / relatedMediumPrice);
+                }));
+            }
+
+            foreach (var task in taskList)
+            {
+                var (Key, Value) = await task;
+                res.Add(Key, Value);
             }
 
             return res;

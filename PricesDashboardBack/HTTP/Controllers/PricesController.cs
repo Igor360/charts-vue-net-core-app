@@ -14,7 +14,6 @@ namespace PricesDashboardBack.HTTP.Controllers
     [ApiController]
     public class PricesController
     {
-        
         private readonly IPricesService _PricesService;
 
         public PricesController(IPricesService pricesService)
@@ -51,7 +50,8 @@ namespace PricesDashboardBack.HTTP.Controllers
                     return new BadRequestResult();
             }
 
-            return this._PricesService.CalculatePricesForPair(baseCoinGroupedData, relatedCoinGroupedData);
+            return this._PricesService.CalculatePricesForPairByTasks(baseCoinGroupedData, relatedCoinGroupedData)
+                .Result;
         }
     }
 }
